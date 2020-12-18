@@ -14,12 +14,21 @@ const storage = storageHandler.create({
     expiredInterval: 2 * 60 * 1000, // every 2 minutes the process will clean-up the expired cache
     forgiveParseErrors: false
 });
-storage.init(function (err) {
-    if (err) {
-        console.error("Failed to initialize the Local parameters storage")
-    } else {
-        console.log("Initialized successfully the Local parameters storage")
-    }
+storage.init().then(function (res) {
+    console.log("Initialized successfully the Local parameters storage @ " + res.dir)
+    storage.keys()
+        .then(function (keys) {
+            console.log("Values in storage:")
+            keys.forEach(function (key) {
+                storage.get(key)
+                    .then(function (value) {
+                        console.log(`"${key}" = "${value}"`)
+                    })
+                    .catch(function (err) {
+                        console.error(`Could not read ${key}'s value!`)
+                    })
+            })
+    })
 });
 
 app.use(express.json({limit: '5mb'}));
@@ -29,10 +38,10 @@ app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, X-WSS-Key, X-API-Key, X-User-Agent, User-Agent");
     next();
 });
-app.get('/', function (req, res, next) {
+app.get('/', function (req, res) {
     res.status(200).send('<b>Lizumi Storage API v1.2</b>')
 });
-app.get("/get", function(req, res, next) {
+app.get("/get", function(req, res) {
     if (req.query.item !== undefined && req.query.item !== "") {
         storage.getItem(req.query.item)
             .then(function (results) {
@@ -54,7 +63,37 @@ app.get("/get", function(req, res, next) {
         console.error(`Request Error missing query!`)
     }
 });
-app.get("/set", function (req, res, next) {
+app.get("/all", function(req, res) {
+    storage.keys()
+        .then(function (keys) {
+            if (keys.length === 0) {
+                res.status(404).send('EMPTY')
+                console.error(`Request Error: There are no items in storage`)
+            } else {
+                let results = []
+                keys.forEach(function (key, index) {
+                    storage.get(key)
+                        .then(function (value) {
+                            results.push({key: key, value: value})
+                            if (index === keys.length - 1) {
+                                res.status(200).send(results)
+                                console.log(results)
+                            }
+                        })
+                        .catch(function (err) {
+                            console.error(`Could not read ${key}'s value!`)
+                        })
+                })
+            }
+        })
+        .catch(function (err) {
+            res.status(500).send()
+            console.error(`Request Error:`)
+            console.error(err)
+        })
+
+});
+app.get("/set", function (req, res) {
     if (req.query.item !== undefined && req.query.value !== undefined && req.query.item !== "" && req.query.value !== "") {
         storage.setItem(req.query.item, req.query.value)
             .then(function (results) {
@@ -74,6 +113,31 @@ app.get("/set", function (req, res, next) {
     } else {
         res.status(500).send('INVALID_REQUEST')
         console.error(`Save Error missing query or value!`)
+    }
+})
+app.get("/del", function (req, res) {
+    if (req.query.item !== undefined && req.query.item !== "") {
+        storage.removeItem(req.query.item)
+            .then(function (results) {
+                if (results && results.removed) {
+                    res.status(200).send('OK')
+                    console.log(results)
+                } else if (results && results.existed === false) {
+                    res.status(200).send('OK')
+                    console.log(results)
+                } else {
+                    res.status(500).send('DELETE_FAILED')
+                    console.error(`Delete Error: "${req.query.item}" was not removed`)
+                }
+            })
+            .catch(function (err) {
+                res.status(500).send()
+                console.error(`Delete Error: "${req.query.item}" = "${req.query.value}"`)
+                console.error(err)
+            })
+    } else {
+        res.status(500).send('INVALID_REQUEST')
+        console.error(`Delete Error missing query!`)
     }
 })
 
