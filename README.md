@@ -8,5 +8,7 @@ Commands (All done via GET):
 * del (/del?item=name)
 * all (/all)
 
-When you run you must specify a listen port as a argument when you launch the program (I am not implementing config files and verification for something so simple)
-Example: node ./index.js 8080
+When you run you must specify a listen port (HTTP and HTTPS) as a argument when you launch the program (I am not implementing config files and verification for something so simple)
+Example: node ./index.js 8080 8443
+
+HTTPS support was added because homekit requires it

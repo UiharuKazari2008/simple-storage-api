@@ -1,10 +1,14 @@
 const args = process.argv.slice(2);
-if (!isNaN(parseInt(args[0])) && parseInt(args[0]) > 0) {
+if ( args.length > 1 && !isNaN(parseInt(args[0])) && parseInt(args[0]) > 0 && !isNaN(parseInt(args[1])) && parseInt(args[1]) > 0) {
+    const fs = require('fs');
+    const storageHandler = require('node-persist');
     const express = require("express");
     const app = express()
     const http = require('http').createServer(app).listen(parseInt(args[0]));
-    const storageHandler = require('node-persist');
-
+    const https = require('https').createServer({
+        key: fs.readFileSync('./key'),
+        cert: fs.readFileSync('./cert'),
+    }, app).listen(parseInt(args[1]));
 
     const storage = storageHandler.create({
         dir: 'data',
