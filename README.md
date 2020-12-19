@@ -12,3 +12,5 @@ When you run you must specify a listen port (HTTP and HTTPS) as a argument when 
 Example: node ./index.js 8080 8443
 
 HTTPS support was added because homekit requires it, That being said HomeKit REQUIRES a actual valid trusted certificate. You can try loading the cert using a configuration profile on all homehubs or register a real cert with lets encrypt and setup a task to update that cert. Thats for you to figure out, but it works. 
+
+That being said you need to name your certificate "cert" and your key "key". Of you can just change it in the code if your that lazy to rename.
