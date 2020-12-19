@@ -161,7 +161,7 @@ if ( !isNaN(parseInt(config["http-port"].toString())) && parseInt(config["http-p
                                 timeout: 5000
                             }, function (error, response, body) {
                                 if (!error && response.statusCode === 200) {
-                                    console.log(`Call: "${config["call-urls"][parseInt(req.query.opt.toString())].toString()}" = "${results.content}"`)
+                                    console.log(`Call: "${config["call-urls"][parseInt(req.query.opt.toString())].toString()}" = "${body}"`)
                                 } else {
                                     console.error(`Failed Call: "${config["call-urls"][parseInt(req.query.opt.toString())].toString()}" = "${body}"`)
                                 }
