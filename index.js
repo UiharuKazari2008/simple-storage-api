@@ -1,6 +1,6 @@
 const args = process.argv.slice(2);
 const config = require('./config.json')
-if ( args.length > 1 && !isNaN(parseInt(config["http-port"].toString())) && parseInt(config["http-port"].toString()) > 0 && !isNaN(parseInt(config["tls-port"].toString())) && parseInt(config["tls-port"].toString()) > 0) {
+if ( !isNaN(parseInt(config["http-port"].toString())) && parseInt(config["http-port"].toString()) > 0 && !isNaN(parseInt(config["tls-port"].toString())) && parseInt(config["tls-port"].toString()) > 0 ) {
     const fs = require('fs');
     const storageHandler = require('node-persist');
     const express = require("express");
