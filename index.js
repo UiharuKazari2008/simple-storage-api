@@ -163,7 +163,7 @@ if ( !isNaN(parseInt(config["http-port"].toString())) && parseInt(config["http-p
                                 if (!error && response.statusCode === 200) {
                                     console.log(`Call: "${config["call-urls"][parseInt(req.query.opt.toString())].toString()}" = "${results.content}"`)
                                 } else {
-                                    console.error(`Failed Call: "${config["call-urls"][parseInt(req.query.opt.toString())].toString()}" = "${results.content.body}"`)
+                                    console.error(`Failed Call: "${config["call-urls"][parseInt(req.query.opt.toString())].toString()}" = "${body}"`)
                                 }
                             })
                         } else {
