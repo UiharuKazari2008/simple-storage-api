@@ -154,16 +154,16 @@ if ( !isNaN(parseInt(config["http-port"].toString())) && parseInt(config["http-p
                     if (results && results.content.value === req.query.value ) {
                         res.status(200).send('OK')
                         console.log(`Save: "${results.content.key}" = "${results.content.value}"`)
-                        if (req.query.opt !== undefined && req.query.opt !== "" && config["call-urls"][parse(req.query.opt.toString())] !== undefined && config["call-urls"][parse(req.query.opt.toString())] !== "" ) {
+                        if (req.query.opt !== undefined && req.query.opt !== "" && config["call-urls"][parseInt(req.query.opt.toString())] !== undefined && config["call-urls"][parseInt(req.query.opt.toString())] !== "" ) {
                             request({
-                                url: config["call-urls"][parse(req.query.opt.toString())].toString(),
+                                url: config["call-urls"][parseInt(req.query.opt.toString())].toString(),
                                 method: 'GET',
                                 timeout: 5000
                             }, function (error, response, body) {
                                 if (!error && response.statusCode === 200) {
-                                    console.log(`Call: "${config["call-urls"][parse(req.query.opt.toString())].toString()}" = "${results.content}"`)
+                                    console.log(`Call: "${config["call-urls"][parseInt(req.query.opt.toString())].toString()}" = "${results.content}"`)
                                 } else {
-                                    console.error(`Failed Call: "${config["call-urls"][parse(req.query.opt.toString())].toString()}" = "${results.content}"`)
+                                    console.error(`Failed Call: "${config["call-urls"][parseInt(req.query.opt.toString())].toString()}" = "${results.content}"`)
                                 }
                             })
                         } else {
