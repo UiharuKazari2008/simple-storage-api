@@ -1,17 +1,18 @@
 const args = process.argv.slice(2);
-if ( args.length > 1 && !isNaN(parseInt(args[0])) && parseInt(args[0]) > 0 && !isNaN(parseInt(args[1])) && parseInt(args[1]) > 0) {
+const config = require('./config.json')
+if ( args.length > 1 && !isNaN(parseInt(config["http-port"].toString())) && parseInt(config["http-port"].toString()) > 0 && !isNaN(parseInt(config["tls-port"].toString())) && parseInt(config["tls-port"].toString()) > 0) {
     const fs = require('fs');
     const storageHandler = require('node-persist');
     const express = require("express");
+    const request = require('request').defaults({ encoding: null });
     const app = express()
-    const http = require('http').createServer(app).listen(parseInt(args[0]));
+    const http = require('http').createServer(app).listen(parseInt(config["http-port"].toString()));
     const https = require('https').createServer({
-        key: fs.readFileSync('./key'),
-        cert: fs.readFileSync('./cert'),
-    }, app).listen(parseInt(args[1]));
+        key: fs.readFileSync(config["tls-key"].toString()), cert: fs.readFileSync(config["tls-cert"].toString())
+    }, app).listen(parseInt(config["tls-port"].toString()));
 
     const storage = storageHandler.create({
-        dir: 'data',
+        dir: config["data-dir"].toString(),
         stringify: JSON.stringify,
         parse: JSON.parse,
         encoding: 'utf8',
@@ -144,6 +145,43 @@ if ( args.length > 1 && !isNaN(parseInt(args[0])) && parseInt(args[0]) > 0 && !i
         } else {
             res.status(500).send('INVALID_REQUEST')
             console.error(`Delete Error missing query!`)
+        }
+    })
+    app.get("/cet", function (req, res) {
+        if (req.query.item !== undefined && req.query.value !== undefined && req.query.item !== "" && req.query.value !== "" ) {
+            storage.setItem(req.query.item, req.query.value)
+                .then(function (results) {
+                    if (results && results.content.value === req.query.value ) {
+                        res.status(200).send('OK')
+                        console.log(`Save: "${results.content.key}" = "${results.content.value}"`)
+                        if (req.query.opt !== undefined && req.query.opt !== "" && config["call-urls"][parse(req.query.opt.toString())] !== undefined && config["call-urls"][parse(req.query.opt.toString())] !== "" ) {
+                            request({
+                                url: config["call-urls"][parse(req.query.opt.toString())].toString(),
+                                method: 'GET',
+                                timeout: 5000
+                            }, function (error, response, body) {
+                                if (!error && response.statusCode === 200) {
+                                    console.log(`Call: "${config["call-urls"][parse(req.query.opt.toString())].toString()}" = "${results.content}"`)
+                                } else {
+                                    console.error(`Failed Call: "${config["call-urls"][parse(req.query.opt.toString())].toString()}" = "${results.content}"`)
+                                }
+                            })
+                        } else {
+                            console.error(`Failed Call: Unable to process the requested option`)
+                        }
+                    } else {
+                        res.status(500).send('SAVE_FAILED')
+                        console.error(`Save Error: "${req.query.item}" did not save correctly`)
+                    }
+                })
+                .catch(function (err) {
+                    res.status(500).send()
+                    console.error(`Save Error: "${req.query.item}" = "${req.query.value}"`)
+                    console.error(err)
+                })
+        } else {
+            res.status(500).send('INVALID_REQUEST')
+            console.error(`Save Error missing query or value!`)
         }
     })
 

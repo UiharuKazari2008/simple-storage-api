@@ -1,0 +1,11 @@
+{
+  "http-port": 8055,
+  "tls-port": 9045,
+  "tls-cert": "./cert",
+  "tls-key": "./key",
+  "data-dir": "./data",
+  "call-urls": [
+    "url1",
+    "url2"
+  ]
+}
